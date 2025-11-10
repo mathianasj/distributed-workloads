@@ -8,6 +8,8 @@ import json
 import os
 from PIL import Image
 import numpy as np
+from io import BytesIO
+import base64
 
 import logging
 
@@ -65,11 +67,13 @@ if prompt := st.chat_input():
     logger.info(f"User prompt: {prompt}")
 
     # Query Stable Diffusion
-    image = Image.fromarray(np.array(call_api(prompt), dtype="uint8"))
+    image = Image.open(BytesIO(base64.b64decode(call_api(prompt)["image"]["b64"])))
+    # image = Image.fromarray(np.array(, dtype="uint8"))
     msg = f'here is your image related to "{prompt}"'
 
     # Show Result
     st.session_state.messages.append({"role": "assistant", "content": msg, "prompt": prompt, "image": image})
     st.chat_message("assistant").write(msg)
     st.chat_message("assistant").image(image, caption=prompt, use_column_width=True)
+
 
